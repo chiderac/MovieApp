@@ -1,6 +1,8 @@
+
 from flask import Flask, render_template, url_for,  flash, redirect, request, redirect, url_for, session
 from forms import RegistrationForm, LoginForm, PostForm
 from flask_login import login_user, current_user, logout_user, login_required
+from movie_utils import get_movie_id, get_show_info, get_links, api_key, streaming_links
 from PIL import Image
 import requests 
 import json
@@ -8,12 +10,13 @@ import secrets
 import os
 from flask_bcrypt import Bcrypt
 from flask_mysqldb import MySQL
-import mysql.connector
-from sql_python_connection import find_login #insert_user, find_user
 import MySQLdb.cursors
+import mysql.connector
+from sql_python_connection import save_data
 import re
-import movie_utils
-from movie_utils import get_movie_id, get_show_info, get_links, api_key, Show, api_key
+import itertools
+#import movie_utils
+#from movie_utils import get_movie_id, get_show_info, get_links, api_key, Show, api_key
 
 
 app = Flask(__name__)
@@ -56,7 +59,14 @@ def movie():
     
     return render_template('movie.html', posts=posts, title="Movie")
 
-
+#movie details  
+# @app.route("/movie/<id>", methods=['GET', 'POST'])
+# def movie(id):
+#     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+#     cursor.execute('SELECT * FROM movie WHERE id = id')
+#     current_post = cursor.fetchone()
+#     #current_post = Job_Requirements.query.filter_by(id=id).first_or_404()
+#     return render_template('movie2.html', title='Movie', current_post=current_post) 
 
 # Registration
 @app.route('/register', methods =['GET', 'POST'])
@@ -124,27 +134,63 @@ def search():
         url1 = f"https://api.watchmode.com/v1/title/{movie_id}/details/?apiKey={api_key}&append_to_response=sources"
         #get_show_info(url1)
         results = get_show_info(url1)
-        user_results = Show(results)
+        change = tuple(results)
+        print(change)
+        #print(results)
+        # id = results[0]
+        # title = results[1]
+        # year=results[2] 
+        # genre=results[3]
+        # user_rating=results[4]
+        # poster = results[5]
+        # original_language=results[6]
+        # trailer=results[7]
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('INSERT INTO movies VALUES (% s, % s, % s, % s, % s, % s, % s)', (id, title, type, release_year, genre, user_rating, language))
+        #for i in results:
+            #cursor.execute("INSERT INTO Movies VALUES ('%s')", (i,))
+    
+        query = "INSERT INTO movies (id, title, year, genre, user_rating, poster, original_language, trailer) VALUES (% s, % s, % s, % s, % s, % s, % s, % s)" 
+        cursor.execute(query, change)
+        #mysql.connection.commit()
+        
+        #stream = type(streaming_links)
+        #query2 = "INSERT INTO StreamingService (movie_id, service1, service2, service3, service4, service5, service6, service7, service8, service9) VALUES ((select id from movies), % s, % s, % s, % s, % s, % s, % s, % s, % s)"
+        #query2 = "INSERT INTO StreamingService set (movie_id = (select id from movies), service1 = % s, service2 = % s, service3 = % s, service4 = % s, service5 = % s, service6 = % s, service7 = % s, service8 = % s, service9 = % s)" 
+        # small_set = set(itertools.islice(streaming_links, 5))
+        # print(small_set)
+        small_set = set(itertools.islice(streaming_links, 5))
+        print(small_set)
+        small = tuple(small_set)
+        print(small)
+        query2 = "INSERT INTO StreamingService (movie_id, service1, service2, service3, service4, service5) VALUES ((select id from movies), % s, % s, % s, % s, % s)"
+        cursor.execute(query2, small)
+        #     row = (row,)
+        #     print(row)
+        #save_data(change)
+        #cursor.execute("INSERT INTO movies (id, title, year, genre, user_rating, poster, original_language, trailer) VALUES (% s, % s, % s, % s, % s, % s, % s, % s)", % change)
         mysql.connection.commit()
         return redirect(url_for('movie'))
+        #save_data(id, title, year, genre, user_rating, poster, original_language, trailer)
+        #from movie_utils import Show
+        #user_results = Show(results)
+        #print(user_results)
+        #cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        #cursor.execute('INSERT INTO Movies VALUES (% s, % s, % s, % s, % s, % s, % s)', (id, title, year, genre, user_rating, poster, language, trailer,))
+        #cursor.execute("""INSERT INTO Movies (id, title, release_year, genre, user_rating, poster, language, trailer) """ 
+                       #""" VALUES (% s, % s, % s, % s, % s, % s, % s) """, (id, title, release_year, genre, user_rating, poster, language, trailer))
+        # for i in results:
+        #     cursor.execute("INSERT INTO Movies VALUES ('%s')", (i,))
+        #mysql.connection.commit()
+      
         #response = requests.get(url0)
         #show = response.json()
         #movie_id = show["title_results"][0]["id"]
         #print(f'Movie ID retrieved:{movie_id}')
-    return render_template('search_movie.html', title='Search',form=form)
+    return render_template('search_movie.html', title='Search', form=form)
     
 
 
-#movie details  
-@app.route("/movie/<id>", methods=['GET', 'POST'])
-def movie(id):
-    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute('SELECT * FROM movie WHERE id = %s')
-    current_post = cursor.fetchone()
-    #current_post = Job_Requirements.query.filter_by(id=id).first_or_404()
-    return render_template('movie.html', title='Movie', current_post=current_post) 
+
 
 # #adding a picture to profile 
 # def save_pic(form_pic):
@@ -158,7 +204,7 @@ def movie(id):
 #     i.thumbnail(output_size)
 #     i.save(pic_path)
     
-    return pic_fn
+    #return pic_fn
 
 @app.route("/user", methods=['GET', 'POST']) #methods used to update account info if necessary
 #@login_required
@@ -167,15 +213,15 @@ def user():
 
 
 
-# #creating custom error pages for my application
-# @app.errorhandler(404)
-# def pagenotfound(e):
-#     return render_template('404.html'), 404
+#creating custom error pages for my application
+@app.errorhandler(404)
+def pagenotfound(e):
+    return render_template('404.html'), 404
 
-# #internal server error
-# @app.errorhandler(500)
-# def pagenotfound(e):
-#     return render_template('500.html'), 500
+#internal server error
+@app.errorhandler(500)
+def pagenotfound(e):
+    return render_template('500.html'), 500
 
 
 if __name__ == "__main__":
