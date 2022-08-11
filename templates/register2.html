@@ -175,7 +175,7 @@ padding-top: 580px;
     margin-right: auto ;
 }
 .regbottom{
-    margin-top: 70px;
+    margin-top: 10px;
     text-align:center;
 }
 .regbutton{
@@ -252,8 +252,7 @@ input[type=password], select {
       <ul class="nav navbar-nav navbar-right">
         <li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
         <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('user') }}">USER PAGE</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('movie') }}">MOVIE PAGE</a></li>
+        <!--<li><a class="nav-item nav-link" href="{{ url_for('user') }}">USER PAGE</a></li>-->
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
           <span class="caret"></span></a>
@@ -303,7 +302,6 @@ document.getElementsByTagName("h1")[0].style.fontSize = "80px";
                   {% else %} {{ form.username(class="form-control form-control-lg") }} {% endif %}
               </div>
               <div class="form-group">
-                <!--<input type="email" id="email" name="email" placeholder="Email ...">-->
                 {{ form.email.label(class="form-control-label") }} {% if form.email.errors %} {{ form.email(class="form-control form-control-lg is-invalid") }}
                 <div class="invalid-feedback">
                     {% for error in form.email.errors %}

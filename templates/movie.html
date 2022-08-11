@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 {% block content%}
-{% for post in posts %}
-<h1>{{ post.title }}</h1>
-<p>{{ post.content}}</p>
-<p>{{ post.release_date }}</p>
-<p>{{ post.poster}}</p>
-<p>{{ post.trailer}}</p>
-<p>{{ post.streaming_links }}</p>
-{% endfor %}
+
+<h1>{{ current_post.title }}</h1>
+<p>{{ current_post.year}}</p>
+<p>{{ current_post.genre}}</p>
+<p>{{ current_post.user_rating}}</p>
+<p>{{ current_post.poster}}</p>
+<p>{{ current_post.trailer}}</p>
+
 {% endblock content %}

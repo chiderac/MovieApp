@@ -1,7 +1,7 @@
 
 from flask import Flask, render_template, url_for,  flash, redirect, request, redirect, url_for, session
 from forms import RegistrationForm, LoginForm, PostForm
-from flask_login import login_user, current_user, logout_user, login_required
+from flask_login import LoginManager, login_user, current_user, logout_user, login_required, UserMixin
 from movie_utils import get_movie_id, get_show_info, get_links, api_key, streaming_links
 from PIL import Image
 import requests 
@@ -15,8 +15,6 @@ import mysql.connector
 from sql_python_connection import save_data
 import re
 import itertools
-#import movie_utils
-#from movie_utils import get_movie_id, get_show_info, get_links, api_key, Show, api_key
 
 
 app = Flask(__name__)
@@ -34,17 +32,36 @@ app.config['MYSQL_DB'] = 'movieapp'
 # Intialize MySQL
 mysql = MySQL(app)
 
-posts = [
-    {
-        'author': 'Corey Schafer',
-        'title': 'Game of Thrones',
-        'content': 'First post content',
-        'release_date': '2011-04-17',
-        'poster': 'https://cdn.watchmode.com/posters/0345534_poster_w185.jpg',
-        'Trailer': ' https://www.youtube.com/watch?v=BpJYNVhGf1s',
-        'streaming_links': 'https://tv.apple.com/us/episode/winter-is-coming/umc.cmc.11q7jp45c84lp6d16zdhum6ul?playableId=tvs.sbd.9001%3A494877461&showId=umc.cmc.7htjb4sh74ynzxavta5boxuzq'
-    }]
 
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message ='You must be logged in to access this page'
+login_manager.login_message_category = 'info'
+
+# posts = [
+#     {
+#         'author': 'Corey Schafer',
+#         'title': 'Game of Thrones',
+#         'content': 'First post content',
+#         'release_date': '2011-04-17',
+#         'poster': 'https://cdn.watchmode.com/posters/0345534_poster_w185.jpg',
+#         'Trailer': ' https://www.youtube.com/watch?v=BpJYNVhGf1s',
+#         'streaming_links': 'https://tv.apple.com/us/episode/winter-is-coming/umc.cmc.11q7jp45c84lp6d16zdhum6ul?playableId=tvs.sbd.9001%3A494877461&showId=umc.cmc.7htjb4sh74ynzxavta5boxuzq'
+#     }]
+
+
+
+
+# @login_manager.user_loader
+# def loading_user(username):
+#     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+#     #cursor.execute('SELECT * FROM movie WHERE id = %s'(id))
+#     cursor.execute(f"SELECT username FROM movies WHERE username = {username}")
+#     # data = (id,)
+#     # cursor.execute(query, data)
+#     post = cursor.fetchone()
+#     return post
 
 # Homepage 
 @app.route('/')
@@ -53,20 +70,34 @@ def home():
     return render_template('home2.html')
 
 
-# Movie Page
-@app.route('/movie')
-def movie():
+# # Movie Page
+# @app.route('/movie')
+# def movie():
     
-    return render_template('movie.html', posts=posts, title="Movie")
+#     return render_template('movie2.html', posts=posts, title="Movie")
+
 
 #movie details  
-# @app.route("/movie/<id>", methods=['GET', 'POST'])
-# def movie(id):
-#     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-#     cursor.execute('SELECT * FROM movie WHERE id = id')
-#     current_post = cursor.fetchone()
-#     #current_post = Job_Requirements.query.filter_by(id=id).first_or_404()
-#     return render_template('movie2.html', title='Movie', current_post=current_post) 
+@app.route("/movie/title/<id>", methods=['GET'])
+def movie(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    #cursor.execute('SELECT * FROM movie WHERE id = %s'(id))
+    cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
+    # data = (id,)
+    # cursor.execute(query, data)
+    current_post = cursor.fetchone()
+    print(current_post)
+    
+    cursor.execute(f"SELECT * FROM StreamingService WHERE movie_id = {id}")
+    # data = (id,)
+    # cursor.execute(query, data)
+    stream = cursor.fetchone()
+    print(stream)
+    return render_template('movie2.html', title='Movie', current_post=current_post, stream=stream) 
+
+
+
+
 
 # Registration
 @app.route('/register', methods =['GET', 'POST'])
@@ -76,7 +107,8 @@ def register():
     form = RegistrationForm()
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form and 'email' in request.form and 'fullname' in request.form:
         username = request.form['username']
-        password = request.form['password']
+        #password = request.form['password']
+        password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
         fullname = request.form['fullname']
         email = request.form['email']
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -107,20 +139,42 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
+    # if form.validate_on_submit():
+    #     username = request.form['username']
+    #     password = request.form['password']
+        
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
-        username = request.form['username']
+        username_new = request.form['username']
+        print(username_new)
         password = request.form['password']
+        print(password)
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-        cursor.execute('SELECT * FROM Users WHERE username = % s AND password = % s', (username, password))
-        account = cursor.fetchone()
-        if account:
-            session['loggedin'] = True
-            session['username'] = account['username']
-            flash(f'Logged in successfully !', 'success')
-            return redirect(url_for('user'))
+        #cursor.execute('SELECT * FROM Users WHERE username = % s AND password = % s', (username, password))
+        # cursor.execute('SELECT * FROM Users WHERE username = %s AND password = %s', (username, password))
+        cursor.execute('SELECT * FROM Users WHERE username = %s', [username_new])
+        #cursor.execute(f"SELECT * FROM Users WHERE username = {username}")
+        account_login = cursor.fetchone()
+        print(account_login)
+        account_password = account_login["password"]
+        print(account_password)
+        #if account:
+        unhash_password = bcrypt.check_password_hash(account_password, password)
+        print(unhash_password)
+        if unhash_password:
+            #login_user(user, remember=form.remember.data) #login user and remember data of user
+            # next_page = request.args.get('next')
+            # return redirect(next_page) if next_page else redirect(url_for('user'))
+            return redirect(url_for('user', username_new=username_new))
         else:
             flash(f'Incorrect username / password !', 'danger')
-    return render_template('login2.html', title='Login',form=form)
+    return render_template('login2.html', title='Login', form=form)
+
+
+#route for logout page
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
 
 
 # search page
@@ -205,11 +259,70 @@ def search():
 #     i.save(pic_path)
     
     #return pic_fn
+    
+    
+@login_manager.user_loader   
+def load_user(username):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    #cursor.execute('SELECT * FROM users WHERE username = % s', (username))
+    cursor.execute(f"SELECT * FROM users WHERE username = {username}")
+    user_account = cursor.fetchone()
+    return user_account
 
-@app.route("/user", methods=['GET', 'POST']) #methods used to update account info if necessary
+@app.route("/user/<username_new>", methods=['GET']) #methods used to update account info if necessary
 #@login_required
-def user():
-    return render_template('user2.html', title='user')
+def user(username_new):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    #cursor.execute(f"SELECT * FROM users WHERE username = {username}")
+    #cursor.execute("SELECT * FROM users WHERE username = %s", (username_new))
+    cursor.execute( "SELECT * FROM users WHERE username LIKE %s", [username_new] )
+    #cursor.execute('SELECT * FROM Users WHERE username = %s', [username])
+    #cursor.execute(f"SELECT * FROM Users WHERE username = {username}")
+    profile_post = cursor.fetchone()
+    print(profile_post)
+    cursor.execute( "SELECT * FROM watchedmovies WHERE username LIKE %s", [username_new] )
+    watched_post = cursor.fetchone()
+    print(watched_post)
+    
+    cursor.execute( "SELECT * FROM savedmovies WHERE username LIKE %s", [username_new] )
+    saved_post = cursor.fetchone()
+    print(saved_post)
+    return render_template('user2.html', title='User', profile_post=profile_post, watched_post=watched_post, saved_post=saved_post)
+
+
+# watched buttons
+@app.route("/movie/<id>/<username_new>/watched", methods=['GET']) #methods used to update account info if necessary
+#@login_required
+def watched(id, username_new):
+    print(id)
+    print(username_new)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
+    current_post = cursor.fetchone()
+    watched_title = current_post["title"]
+    print(watched_title)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('INSERT INTO watchedmovies VALUES (% s, % s, % s)', (username_new, id, watched_title))
+    mysql.connection.commit()
+    flash('This movie has been saved to your watched list!', 'success')
+    return redirect(url_for('user', id=id, username_new=username_new, current_post=current_post))
+
+# save for later button
+@app.route("/movie/<id>/<username_new>/save", methods=['GET']) #methods used to update account info if necessary
+#@login_required
+def save(id, username_new):
+    print(id)
+    print(username_new)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
+    current_post_new = cursor.fetchone()
+    saved_title = current_post_new["title"]
+    print(saved_title)
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute('INSERT INTO savedmovies VALUES (% s, % s, % s)', (username_new, id, saved_title))
+    mysql.connection.commit()
+    flash('This movie has been saved to your save list!', 'success')
+    return redirect(url_for('user', id=id, username_new=username_new, current_post_new=current_post_new))
 
 
 

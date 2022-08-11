@@ -1,8 +1,13 @@
 {
     "python.pythonPath": "movieappvenv\\Scripts\\python.exe",
     "cSpell.words": [
+        "listy",
+        "loggedin",
         "maplist",
         "movieapp",
+        "savedmovies",
+        "unhash",
+        "watchedmovies",
         "wtforms"
     ]
 }

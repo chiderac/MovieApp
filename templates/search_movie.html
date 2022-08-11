@@ -250,10 +250,10 @@ input[type=password], select {
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
-        <li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('user') }}">USER PAGE</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('movie') }}">MOVIE PAGE</a></li>
+        <!--<li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>-->
+        <li><a class="nav-item nav-link" href="{{ url_for('user', username_new=form.username) }}">USER PAGE</a></li>
+        <!--<li><a class="nav-item nav-link" href="{{ url_for('movie', id=form.id) }}">MOVIE PAGE</a></li>-->
         <li><a class="nav-item nav-link" href="{{ url_for('search') }}">SEARCH</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE

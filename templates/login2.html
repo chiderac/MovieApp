@@ -181,7 +181,7 @@ padding-top: 750px;
     margin-right: auto ;
 }
 .loginbottom{
-    margin-top: 70px;
+    margin-top: 10px;
     text-align:center;
 }
 .loginbutton{
@@ -247,10 +247,8 @@ input[type=password], select {
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
-      <li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
+      <li><a class="nav-item nav-link" href="{{ url_for('home') }}">HOME</a></li>
         <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('user') }}">USER PAGE</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('movie') }}">MOVIE PAGE</a></li>
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
           <span class="caret"></span></a>
@@ -303,13 +301,13 @@ document.getElementsByTagName("h1")[0].style.fontSize = "80px";
             </div>
                     <!--<input type="text" id="fname" name="firstname" placeholder="Username ...">
                      <input type="password" id="fname" name="firstname" placeholder="Password ...">-->
-                </div>
+                    </div>
                 
-            </div>
+                  </div>
                 <div class="loginbottom">
                   <div class="form-group">
                     {{ form.submit(class="btn btn-primary") }}
-                    <!--<a href="{{ url_for('user') }}" class="loginbutton">Submit</a>-->
+            
                     </form>
                 </div>
         </div>
