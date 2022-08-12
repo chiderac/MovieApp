@@ -20,7 +20,7 @@ def _connect_to_db(db_name='movie_database'):
     cnx = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Cecile060414",
+        password="RandomPassword",
         database=db_name
     )
     return cnx
@@ -35,8 +35,8 @@ class UserSuccessful(TestCase):
 # TEST 3
 class PasswordSuccessful(TestCase):
     def test_password(self):
-        expected = "Cecile060414"
-        result = "Cecile060414"
+        expected = "RandomPassword"
+        result = "RandomPassword"
         self.assertEqual(expected, result)
         
 # TEST 4
