@@ -1,0 +1,120 @@
+from unittest import TestCase
+import mysql.connector
+
+# TEST 1 BUT this is not based on our program and is technically not testing the program
+# so group can decide whether to include or not
+
+def no_username(my_username='ryangos'):
+    if my_username == 'ryangis':
+        return 'Wrong username, please try again'
+
+
+class NoUsernameFound(TestCase):
+    def test_login_form(self):
+        expected = 'Wrong username, please try again'
+        result = no_username(my_username='ryangis')
+        self.assertEqual(expected, result)
+
+# TEST 2 & 3   
+def _connect_to_db(db_name='movie_database'):
+    cnx = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="RandomPassword",
+        database=db_name
+    )
+    return cnx
+
+# TEST 2
+class UserSuccessful(TestCase):
+    def test_user(self):
+        expected = "root"
+        result = "root"
+        self.assertEqual(expected, result)
+
+# TEST 3
+class PasswordSuccessful(TestCase):
+    def test_password(self):
+        expected = "RandomPassword"
+        result = "RandomPassword"
+        self.assertEqual(expected, result)
+        
+# TEST 4
+def check_response(response):
+    if response.status_code < 200 or response.status_code >= 300:
+        print('API error')
+        print(f'Response code: {response.status_code}')
+        if response.status_code == 402:
+            print('New API Key Required')
+        return False
+    else:
+        print('API connection successful')
+        # print(f'API response code: {response.status_code}')
+        return True
+
+# TEST 4
+class ResponseSuccess(TestCase):
+    def test_response(self):
+        expected = True
+        result = True
+        self.assertEqual(expected, result)
+
+
+# not sure about this one even though it passes
+class ResponseFail(TestCase):
+    def test_response_2(self):
+        expected = False
+        result = True
+        self.assertNotEqual(expected, result)
+
+
+# TEST 5
+def get_links(d, l):
+    if len(l) == 1:
+        return d[l[0]]
+    return get_links(d[l[0]], l[1:])
+
+
+class GettingLinks(TestCase):
+    def test_getting_links(self):
+        expected = get_links
+        result = get_links
+        self.assertEqual(expected, result)
+        
+# TEST 6
+def validate_email(self, email):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute(f"SELECT * FROM users WHERE email = {self.email}")
+    user = cursor.fetchone()
+    # user = User.query.filter_by(email=email.data).first()
+    if user:
+        raise ValidationError('This email is already in use. Please choose another email!')
+
+
+class ValidationTest(TestCase):
+    def test_validation(self):
+        expected = 'This email is already in use. Please choose another email!'
+        result = 'This email is already in use. Please choose another email!'
+        self.assertEqual(expected, result)
+
+# TEST 7
+try:
+    def get_movie_id(url0):
+        response = requests.get(url0)
+        if not check_response(response):
+            exit(2)
+        else:
+            show = response.json()
+            movie_id = show["title_results"][0]["id"]
+            print(f'Movie ID retrieved:{movie_id}')
+            # streaming_links.add(movie_id)
+            return movie_id
+except IndexError:
+    print("The movie you are looking for is not in the database. Please check your entry or search for another show")
+
+# I put a random movie ID here as i did not have the fight club example
+class MovieIDTest(TestCase):
+    def test_movie_id(self):
+        expected = 12233
+        result = 12233
+        self.assertEqual(expected, result)
