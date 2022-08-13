@@ -66,7 +66,6 @@ def movie(id):
     cursor.execute(f"SELECT * FROM StreamingService WHERE movie_id = {id}")
     stream = cursor.fetchone()
     print(stream)
-    #print(stream.pop("movie_id"))
     del stream["movie_id"]
     print(stream)
     
@@ -144,9 +143,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.pop('loggedin', None)
-    #session.pop('id', None)
     session.pop('username', None)
-    #logout_user()
     return redirect(url_for('login'))
 
 
@@ -192,16 +189,17 @@ def search():
             
             if len(fixed) < 5: 
             # Make a list of None, one per missing value
+            # Add the None list to the list of values to make up the count.
                 extras = [None] * (5 - len(small_set))
                 print(extras)
-            
-            # Add the None list to the list of values to make up the count.
                 fixed.extend(extras)
             print(fixed)
             print("This is fixed", fixed)
             fixed.insert(0, specific_id)
             fixed_set = tuple(fixed)
             print(fixed_set)
+            
+            
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             query2 = "INSERT INTO StreamingService (movie_id, service1, service2, service3, service4, service5) VALUES ((select id from movies WHERE id = %s), % s, % s, % s, % s, % s)"
             cursor.execute(query2, fixed_set)
@@ -214,7 +212,7 @@ def search():
 
 
     
-    
+# login manager - not used 
 @login_manager.user_loader   
 def load_user(username):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -222,7 +220,9 @@ def load_user(username):
     user_account = cursor.fetchone()
     return user_account
 
-@app.route("/user/<username_new>", methods=['GET']) #methods used to update account info if necessary
+
+# user page
+@app.route("/user/<username_new>", methods=['GET']) 
 #@login_required
 def user(username_new):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -259,11 +259,10 @@ def user(username_new):
 
 
 # watched buttons
-@app.route("/movie/<id>/<username_new>/watched", methods=['GET']) #methods used to update account info if necessary
+@app.route("/movie/<id>/<username_new>/watched", methods=['GET']) 
 #@login_required
 def watched(id, username_new):
     print(id)
-    #print(username_new)
     username_new = session["username"]
     print(username_new)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
@@ -303,12 +302,11 @@ def watched(id, username_new):
     return redirect(url_for('user', id=id, username_new=username_new, current_post=current_post, profile_post=profile_post, watched_post=watched_post, message=message, watched_post_all=watched_post_all))
 
 # save for later button
-@app.route("/movie/<id>/<username_new>/save", methods=['GET']) #methods used to update account info if necessary
+@app.route("/movie/<id>/<username_new>/save", methods=['GET']) 
 #@login_required
 def save(id, username_new):
     print(id)
     username_new = session["username"]
-    #print(username_new)
     print(username_new)
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
@@ -342,7 +340,6 @@ def save(id, username_new):
         cursor.execute( "SELECT * FROM savedmovies WHERE username = %s", [username_new])
         saved_post_all = cursor.fetchall()
         print(saved_post_all)
-        #return redirect(url_for('movie', id=saved.id))
     return redirect(url_for('user', username_new=username_new, current_post_new=current_post_new, profile_post=profile_post, saved_post=saved_post, message=message, saved_post_all=saved_post_all))
 
 
