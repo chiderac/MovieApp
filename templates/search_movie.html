@@ -250,9 +250,10 @@ input[type=password], select {
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+        {% if session.username %}
         <!--<li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
         <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>-->
-        <li><a class="nav-item nav-link" href="{{ url_for('user', username_new=form.username) }}">USER PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('user', username_new=session.username) }}">USER PAGE</a></li>
         <!--<li><a class="nav-item nav-link" href="{{ url_for('movie', id=form.id) }}">MOVIE PAGE</a></li>-->
         <li><a class="nav-item nav-link" href="{{ url_for('search') }}">SEARCH</a></li>
         <li class="dropdown">
@@ -261,6 +262,7 @@ input[type=password], select {
           <ul class="dropdown-menu">
             <li><a href="">Contact Us</a></li>
             <li><a href="#">More Info</a></li>
+            {% endif %}
           </ul>
         </li>
         <li><a href="#"><span class="glyphicon glyphicon-search"></span></a></li>

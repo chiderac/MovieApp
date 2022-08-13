@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <!-- Theme Made By www.w3schools.com - No Copyright -->
-  <title>Bootstrap Theme The Band</title>
+
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
@@ -221,10 +221,9 @@ form.example::after {
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
-        
         <li><a class="nav-item nav-link" href="{{ url_for('home') }}">HOME</a></li>
         <li><a class="nav-item nav-link" href="{{ url_for('search') }}">SEARCH PAGE</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('logout') }}">LOGOUT</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('logout') }}">LOGOUT</a></li> 
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
           <span class="caret"></span></a>
@@ -242,9 +241,6 @@ form.example::after {
 <div class="container">
     <div class="main-body">
     
-          <!-- Breadcrumb -->
-         
-          <!-- /Breadcrumb -->
           
           <div class="row gutters-sm">
             <div class="col-md-4 mb-3">
@@ -256,9 +252,6 @@ form.example::after {
                       {% block content %}
                       <title>{{ profile_post.title }}</title>
                       <h4>{{ profile_post.username }}</h4>
-                      <!--<p class="text-secondary mb-1">Movie Reviewer</p>
-                      <p class="text-muted font-size-sm">London</p>
-                        <a href="home.html" class="btn btn-primary">Logout</a>-->
                     </div>
                   </div>
                 </div>
@@ -320,13 +313,14 @@ form.example::after {
                   <div class="card h-100">
                     <div class="watched">
                       <h6>WATCHED MOVIES</h6>
-                      {% if watched_post == None %}
-                      <h6>No watched movies</h6> 
-                      {% else %}
-                      {% for post in watched_post %} 
-​                  <li>{{ post.title_watched }}</li>
-                  {% endfor %}
+                      {% if watched_post == {} %}
+                      <h6>No watched movies</h6>
+                      {% elif watched_post == None %}
+                      <h6>No watched movies</h6>
+                      {% else %} 
+                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=watched_post.movie_id)}}">{{ watched_post["title_watched"] }}</a></li>
                   {% endif %}
+                  
                   </div>
                   
                     </div>
@@ -336,12 +330,12 @@ form.example::after {
                   <div class="card h-100">
                     <div class="saved">
                       <h6> SAVED MOVIES</h6>
-                      {% if saved_post == None %}
+                      {% if saved_post == {} %}
+                      <h6>No saved movies</h6>
+                      {% elif saved_post == None %}
                       <h6>No saved movies</h6>
                       {% else %}
-                      {% for post in saved_post %}  
-                  <li>{{ post.title_saved }}</li>
-                  {% endfor %}
+                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=saved_post.movie_id)}}">{{ saved_post.title_saved }}</a></li>
                   {% endif %}
                     {% endblock content %} 
                     </div>

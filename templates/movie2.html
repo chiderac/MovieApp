@@ -245,10 +245,10 @@ body {
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="home.html">HOME</a></li>
-        <li><a href="register.html">REGISTER</a></li>
-        <li><a href="user.html">USER PAGE</a></li>
-        <li><a href="movie.html">MOVIE PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('home') }}">HOME</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('search') }}">SEARCH PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('user', username_new=profile_post.username) }}">USER PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('logout') }}">LOGOUT</a></li> 
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
           <span class="caret"></span></a>
@@ -268,13 +268,14 @@ body {
                 <div class="row">
                     <div class="col-md-4">
                         <div class="profile-img">
-                          <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS52y5aInsxSm31CvHOFHWujqUx_wWTS9iM6s7BAm21oEN_RiGoog" alt=""/>
-                          <!--<img src="{{ current_post.poster }}" alt=""/>-->
+                          {% block content %}
+                          <!--<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS52y5aInsxSm31CvHOFHWujqUx_wWTS9iM6s7BAm21oEN_RiGoog" alt=""/>-->
+                         <img src="{{ current_post.poster }}" alt=""/>
                         </div> 
                     </div>
                     <div class="col-md-8">
                         <div class="profile-head">
-                          {% block content %}
+                          
                           <title>{{ current_post.title }}</title>
                                     <h1>{{ current_post.title }}</h1>
         
@@ -286,10 +287,13 @@ body {
                                     <!--<a href="url">link text</a>-->
                 
                                 <!--<button type="button">Watched</button>-->
-                                <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('watched', id=current_post.id, username_new=form.username)}}">Watched</a>
+                              
+                                <div class="message">{{ message }}</div>
+                                <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('watched', id=current_post.id, username_new=profile_post.username)}}">Watched</a>
                                 <!--<button type="button">Save</button>-->
-                                <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('save', id=current_post.id, username_new=form.username)}}">Saved</a>
-                          
+                      
+                                <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('save', id=current_post.id, username_new=profile_post.username)}}">Saved</a>
+                                
                         </div>
                       </div>
                 </div>
@@ -297,11 +301,19 @@ body {
                     <div class="col-md-8">
                         <div class="link">
                         <h2>Links:</h2>
-                        <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service1 }}</a></p>
+                        {% for k, v in stream.items() %}
+                        {% if stream[k] != None %}
+                        <p class="service1"><a href="{{ stream[k] }}">{{ stream[k] }}</a></p>
+
+
+
+                        <!--<p class="service1"><a href="{{ stream.service1 }}">{{ stream.service1 }}</a></p>
                         <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service2 }}</a></p>
                         <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service3 }}</a></p>
                         <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service4 }}</a></p>
-                        <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service5 }}</a></p>
+                        <p class="service1"><a href="{{ stream.service1 }}">{{ stream.service5 }}</a></p>-->
+                        {% endif %}
+                        {% endfor %}
                         {% endblock content %}         
                         </div>
                     </div>

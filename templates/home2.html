@@ -164,8 +164,13 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+        {% if session.username %}
+        <li><a class="nav-item nav-link" href="{{ url_for('home') }}">HOME</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('search') }}">SEARCH PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('user', username_new=session.username) }}">USER PAGE</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('logout') }}">LOGOUT</a></li> {% else %}
         <li><a class="nav-item nav-link" href="{{ url_for('login') }}">LOGIN</a></li>
-        <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>
+        <li><a class="nav-item nav-link" href="{{ url_for('register') }}">REGISTER</a></li>{% endif %}
         <li class="dropdown">
           <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
           <span class="caret"></span></a>
