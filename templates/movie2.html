@@ -287,8 +287,16 @@ body {
                                     <!--<a href="url">link text</a>-->
                 
                                 <!--<button type="button">Watched</button>-->
-                              
-                                <div class="message">{{ message }}</div>
+                                {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                {% for category, message in messages %}
+                                <div class=" alert alert-{{category}}" role="alert">
+                                {{message}}
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                                {% endwith %}
+                                <!--<div class="message">{{ message }}</div>-->
                                 <a class="btn btn-primary btn-sm mt-1 mb-1" href="{{ url_for('watched', id=current_post.id, username_new=profile_post.username)}}">Watched</a>
                                 <!--<button type="button">Save</button>-->
                       

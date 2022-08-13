@@ -62,9 +62,11 @@ def movie(id):
     cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
     current_post = cursor.fetchone()
     print(current_post)
+    
     cursor.execute(f"SELECT * FROM StreamingService WHERE movie_id = {id}")
     stream = cursor.fetchone()
     print(stream)
+    #print(stream.pop("movie_id"))
     del stream["movie_id"]
     print(stream)
     
@@ -174,31 +176,27 @@ def search():
             change = tuple(results)
             print(change)
             specific_id = change[0]
-            #counter = []
-            # for i in change:
-            #     counter.append(i)
-            # first_counter = counter[0]
-            # print("first element in change is: ", first_counter)
+            print(specific_id)
+        
             
             # insert into movies database 
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             query = "INSERT INTO movies (id, title, year, genre, user_rating, poster, original_language, trailer) VALUES (% s, % s, % s, % s, % s, % s, % s, % s)" 
             cursor.execute(query, change)
-            #mysql.connection.commit()
+            mysql.connection.commit()
             
             small_set = set(itertools.islice(streaming_links, 5))
-            #new_set = list(small_set)
-            #new_set.insert(0, first_counter)
             print(small_set)
-            #small = tuple(small_set)
-            #print(small)
             fixed = list(small_set)
             print(fixed)
+            
+            if len(fixed) < 5: 
             # Make a list of None, one per missing value
-            extras = [None] * (5 - len(small_set))
-            print(extras)
+                extras = [None] * (5 - len(small_set))
+                print(extras)
+            
             # Add the None list to the list of values to make up the count.
-            fixed.extend(extras)
+                fixed.extend(extras)
             print(fixed)
             print("This is fixed", fixed)
             fixed.insert(0, specific_id)
@@ -206,7 +204,6 @@ def search():
             print(fixed_set)
             cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
             query2 = "INSERT INTO StreamingService (movie_id, service1, service2, service3, service4, service5) VALUES ((select id from movies WHERE id = %s), % s, % s, % s, % s, % s)"
-            #query2 = "INSERT INTO StreamingService (movie_id, service1, service2, service3, service4, service5) VALUES (% s, % s, % s, % s, % s, % s)"
             cursor.execute(query2, fixed_set)
             mysql.connection.commit()
             return redirect(url_for('movie', id=specific_id))
@@ -221,7 +218,6 @@ def search():
 @login_manager.user_loader   
 def load_user(username):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    #cursor.execute('SELECT * FROM users WHERE username = % s', (username))
     cursor.execute(f"SELECT * FROM users WHERE username = {username}")
     user_account = cursor.fetchone()
     return user_account
@@ -235,17 +231,31 @@ def user(username_new):
     print(profile_post)
     
     cursor.execute( "SELECT * FROM watchedmovies WHERE username LIKE %s", [username_new] )
-    watched_post = cursor.fetchone()
-    print(watched_post)
-    #print(watched_post["title_watched"])
-    #new_title = watched_post["title_watched"]
+    watched_post_all = cursor.fetchall()
+    print(watched_post_all)
+    
+    for watched_p in watched_post_all:
+        watched_id = watched_p["movie_id"]
+        print(watched_id)
+    
+    cursor.execute( "SELECT * FROM watchedmovies WHERE movie_id = %s", [watched_id] )
+    watched = cursor.fetchone()
+    print(watched)
+    
     
     cursor.execute( "SELECT * FROM savedmovies WHERE username LIKE %s", [username_new] )
-    saved_post = cursor.fetchone()
-    print(saved_post)
-    #print(saved_post["title_saved"])
-    #new_new_title = saved_post["title_saved"]
-    return render_template('user2.html', title='User', profile_post=profile_post, watched_post=watched_post, saved_post=saved_post)
+    saved_post_all = cursor.fetchall()
+    print(saved_post_all)
+    
+    for saved_p in saved_post_all:
+        saved_id = saved_p["movie_id"]
+        print(saved_id)
+    
+    cursor.execute( "SELECT * FROM savedmovies WHERE movie_id = %s", [saved_id] )
+    saved = cursor.fetchone()
+    print(saved)
+    
+    return render_template('user2.html', title='User', profile_post=profile_post, watched_post_all=watched_post_all, saved_post_all=saved_post_all, watched=watched, saved=saved)
 
 
 # watched buttons
@@ -259,9 +269,9 @@ def watched(id, username_new):
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(f"SELECT * FROM movies WHERE id = {id}")
     current_post = cursor.fetchone()
-    #watched_title = current_post["title"]
-    #print(watched_title)
-
+    watched_title = current_post["title"]
+    print(watched_title)
+    
     
     cursor.execute( "SELECT * FROM users WHERE username LIKE %s", [username_new] )
     profile_post = cursor.fetchone()
@@ -269,7 +279,9 @@ def watched(id, username_new):
     watched_username = profile_post["username"]
     print(watched_username)
     
-    cursor.execute( "SELECT * FROM watchedmovies WHERE username LIKE %s", [username_new] )
+   
+    
+    cursor.execute( "SELECT * FROM watchedmovies WHERE username = %s and movie_id = %s", (username_new, id))
     watched_post = cursor.fetchone()
     print(watched_post)
     message = ""
@@ -285,7 +297,10 @@ def watched(id, username_new):
         flash('This movie has been saved to your watched list!', 'success')
         message = 'This movie has been saved to your watched list!'
         print('This movie has been saved to your watched list!')
-    return redirect(url_for('user', id=id, username_new=username_new, current_post=current_post, profile_post=profile_post, watched_post=watched_post, message=message))
+        cursor.execute( "SELECT * FROM watchedmovies WHERE username = %s", [username_new])
+        watched_post_all = cursor.fetchall()
+        print(watched_post_all)
+    return redirect(url_for('user', id=id, username_new=username_new, current_post=current_post, profile_post=profile_post, watched_post=watched_post, message=message, watched_post_all=watched_post_all))
 
 # save for later button
 @app.route("/movie/<id>/<username_new>/save", methods=['GET']) #methods used to update account info if necessary
@@ -308,7 +323,7 @@ def save(id, username_new):
     saved_username = profile_post["username"]
     print(saved_username)
     
-    cursor.execute( "SELECT * FROM savedmovies WHERE username LIKE %s", [username_new] )
+    cursor.execute( "SELECT * FROM savedmovies WHERE username = %s and movie_id=%s", (username_new, id) )
     saved_post = cursor.fetchone()
     print(saved_post)
     
@@ -323,8 +338,12 @@ def save(id, username_new):
         mysql.connection.commit()
         flash('This movie has been saved to your save list!', 'success')
         message = 'This movie has been saved to your save list!'
-        print('This movie has been saved to your save list!')   
-    return redirect(url_for('user', username_new=username_new, current_post_new=current_post_new, profile_post=profile_post, saved_post=saved_post, message=message))
+        print('This movie has been saved to your save list!')
+        cursor.execute( "SELECT * FROM savedmovies WHERE username = %s", [username_new])
+        saved_post_all = cursor.fetchall()
+        print(saved_post_all)
+        #return redirect(url_for('movie', id=saved.id))
+    return redirect(url_for('user', username_new=username_new, current_post_new=current_post_new, profile_post=profile_post, saved_post=saved_post, message=message, saved_post_all=saved_post_all))
 
 
 

@@ -313,14 +313,17 @@ form.example::after {
                   <div class="card h-100">
                     <div class="watched">
                       <h6>WATCHED MOVIES</h6>
-                      {% if watched_post == {} %}
+                      {% for watched in watched_post_all%}
+                      {% if watched == {} %}
                       <h6>No watched movies</h6>
-                      {% elif watched_post == None %}
+                      {% elif watched == None %}
                       <h6>No watched movies</h6>
                       {% else %} 
-                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=watched_post.movie_id)}}">{{ watched_post["title_watched"] }}</a></li>
+                      
+                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=watched.movie_id)}}">{{ watched["title_watched"] }}</a></li>
+                
                   {% endif %}
-                  
+                  {% endfor %}
                   </div>
                   
                     </div>
@@ -330,13 +333,15 @@ form.example::after {
                   <div class="card h-100">
                     <div class="saved">
                       <h6> SAVED MOVIES</h6>
-                      {% if saved_post == {} %}
+                      {% for saved in saved_post_all%}
+                      {% if saved == {} %}
                       <h6>No saved movies</h6>
-                      {% elif saved_post == None %}
+                      {% elif saved == None %}
                       <h6>No saved movies</h6>
                       {% else %}
-                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=saved_post.movie_id)}}">{{ saved_post.title_saved }}</a></li>
+                  <li><a class="nav-item nav-link" href="{{ url_for('movie', id=saved.movie_id)}}">{{ saved.title_saved }}</a></li>
                   {% endif %}
+                  {% endfor %}
                     {% endblock content %} 
                     </div>
                   </div>
