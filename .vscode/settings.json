@@ -5,6 +5,7 @@
         "loggedin",
         "maplist",
         "movieapp",
+        "mysqldb",
         "posty",
         "savedmovies",
         "unhash",

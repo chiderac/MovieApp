@@ -26,7 +26,7 @@ app.config['SECRET_KEY'] = '5ef125114dc5f9b1ba25242cfac67cc0'
 # Enter your database connection details below
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = "Cecile060414"
+app.config['MYSQL_PASSWORD'] = "" # type your password into the password section of the MYSQL_PASSWORD
 app.config['MYSQL_DB'] = 'movieapp'
 
 # Intialize MySQL
